@@ -284,7 +284,10 @@ ipcMain.handle('status:get', () => arcadia.status());
 
 ipcMain.handle('update:state', () => updater.getState());
 ipcMain.handle('update:check', () => updater.check(true));
-ipcMain.handle('update:install', () => updater.install());
+ipcMain.handle('update:install', () => {
+  if (mc.isRunning()) throw new Error('Yangilashdan oldin o\u2018yinni yoping.');
+  return updater.install();
+});
 
 ipcMain.handle('avatar:get', (_e, uuid, version) => arcadia.avatar(uuid, version));
 ipcMain.handle('skin:get', () => arcadia.fullSkin());

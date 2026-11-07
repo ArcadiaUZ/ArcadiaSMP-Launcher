@@ -1664,10 +1664,14 @@
       });
     }
     if ($('installUpdateBtn')) {
-      $('installUpdateBtn').addEventListener('click', () => {
+      $('installUpdateBtn').addEventListener('click', async () => {
         if (S.update && S.update.status === 'ready') {
-          A.updates.install();
-          toast('Launcher yangilanmoqda\u2026', 'info');
+          try {
+            await A.updates.install();
+            toast('Launcher yangilanmoqda\u2026', 'info');
+          } catch (e) {
+            toast(errText(e), 'err');
+          }
         }
       });
     }
