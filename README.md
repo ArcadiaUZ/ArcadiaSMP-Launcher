@@ -62,6 +62,21 @@ npm run dist
 
 Natija: `dist\ArcadiaSMP-Launcher-<versiya>-setup.exe` va `dist\latest.yml`.
 
+## Yangi versiya chiqarish
+
+1. `package.json` dagi `version` ni oshiring (masalan `0.2.4` → `0.2.5`).
+2. Kodni commit qiling va `main` ga push qiling.
+3. Tag yarating va push qiling:
+
+   ```bat
+   git tag v0.2.5
+   git push origin v0.2.5
+   ```
+
+4. GitHub Actions `.github/workflows/build.yml` orqali installerni yig‘adi va
+   `v0.2.5` release’iga `latest.yml`, `.exe` va `.blockmap` fayllarini yuklaydi.
+5. O‘rnatilgan launcher keyingi ishga tushishida yangilanishni ko‘radi.
+
 ## Arxitektura
 
 ```text
