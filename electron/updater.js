@@ -50,6 +50,8 @@ function init(options) {
   autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.allowDowngrade = false;
   autoUpdater.allowPrerelease = false;
+  autoUpdater.disableDifferentialDownload = true;
+  autoUpdater.disableWebInstaller = true;
   autoUpdater.logger = console;
 
   autoUpdater.on('checking-for-update', () => {
