@@ -29,6 +29,7 @@ function emit() {
 
 function set(patch) {
   state = Object.assign({}, state, patch || {});
+  console.log('[updater]', state.status, state.available || '', state.error || '');
   emit();
 }
 
@@ -49,6 +50,7 @@ function init(options) {
   autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.allowDowngrade = false;
   autoUpdater.allowPrerelease = false;
+  autoUpdater.logger = console;
 
   autoUpdater.on('checking-for-update', () => {
     set({ status: 'checking', error: '', manual: manualCheck, checkedAt: Date.now() });

@@ -368,7 +368,7 @@
   function showLogin() {
     $('loginView').classList.remove('hidden');
     $('appView').classList.add('hidden');
-    $('loginVersion').textContent = (S.info && S.info.version) || '0.2.3';
+    $('loginVersion').textContent = (S.info && S.info.version) || '0.2.4';
     if (S.config && S.config.account && S.config.account.username) {
       $('loginUser').value = S.config.account.username;
     }
@@ -582,9 +582,9 @@
 
   function fillHome() {
     if ($('homeIpText')) $('homeIpText').textContent = serverAddress();
-    if ($('homeVersion')) $('homeVersion').textContent = 'v' + ((S.info && S.info.version) || '0.2.3');
+    if ($('homeVersion')) $('homeVersion').textContent = 'v' + ((S.info && S.info.version) || '0.2.4');
     if ($('serversIp')) $('serversIp').textContent = serverAddress();
-    if ($('aboutVersion')) $('aboutVersion').textContent = (S.info && S.info.version) || '0.2.3';
+    if ($('aboutVersion')) $('aboutVersion').textContent = (S.info && S.info.version) || '0.2.4';
   }
 
   function renderHomeInstance() {
@@ -1690,7 +1690,7 @@
     if ($('serverHost')) $('serverHost').value = c.serverHost || '';
     if ($('serverPort')) $('serverPort').value = c.serverPort || 25565;
     if ($('autoJoin')) $('autoJoin').checked = c.autoJoin !== false;
-    if ($('aboutVersion')) $('aboutVersion').textContent = (S.info && S.info.version) || '0.2.3';
+    if ($('aboutVersion')) $('aboutVersion').textContent = (S.info && S.info.version) || '0.2.4';
     fillHome();
     checkJava();
   }

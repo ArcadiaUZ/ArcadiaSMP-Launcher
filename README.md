@@ -34,8 +34,8 @@ Fayl nomi: `ArcadiaSMP-Launcher-<versiya>-setup.exe`
    yangilanadi.
 
 > **Muhim:** hozir o‘rnatilgan `0.2.2` da auto-update kodi yo‘q. Shuning uchun
-> `0.2.3` ni **bir marta qo‘lda** o‘rnatish kerak. Keyingi versiyalar avtomatik
-> keladi.
+> `0.2.3` yoki undan yangiroq versiyani **bir marta qo‘lda** o‘rnatish kerak.
+> Keyingi versiyalar avtomatik keladi.
 
 ## Talablar
 
@@ -94,7 +94,15 @@ renderer/
 - Launcher parolni saqlamaydi; login ArcadiaCore `/api/auth/login` orqali
 - Auto-update faqat shu public repo release’laridan oladi (GitHub provider)
 
-## Versiya 0.2.3
+## Versiyalar
+
+### 0.2.4
+
+- Auto-update oqimi GitHub release orqali to‘liq tekshirildi.
+- `0.2.3` dan `0.2.4` ga avtomatik yangilanish ishlaydi.
+- `updater.js` da holat loglari qo‘shildi (diagnostika uchun).
+
+### 0.2.3
 
 - `electron-updater` qo‘shildi.
 - `Sozlamalar → Launcher haqida` da yangilanish holati, progress va
@@ -102,9 +110,15 @@ renderer/
 - GitHub Releases’dan avtomatik tekshirish va yuklash.
 - Manba kodi ochiq: <https://github.com/ArcadiaUZ/ArcadiaSMP-Launcher>
 
-## Oldingi versiyalar
+### 0.2.2
 
-- `0.2.2` — Fabric `lwjgl.dll` natives fix, default 26.3 mod pack, Modrinth
-  pagination.
-- `0.2.1` — skin va server holati tuzatishlari.
-- `0.2.0` — birinchi ommaviy build.
+- Fabric `lwjgl.dll` natives fix.
+- Default 26.3 mod pack, Modrinth pagination.
+
+### 0.2.1
+
+- Skin va server holati tuzatishlari.
+
+### 0.2.0
+
+- Birinchi ommaviy build.

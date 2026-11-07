@@ -1,7 +1,7 @@
 {
   "name": "arcadia-launcher",
   "productName": "ArcadiaSMP Launcher",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "ArcadiaSMP uchun oflayn Minecraft launcher — x-minecraft-launcher yadrosi asosida",
   "main": "electron/main.js",
   "author": "ArcadiaSMP",
