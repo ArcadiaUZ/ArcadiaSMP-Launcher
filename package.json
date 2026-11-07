@@ -1,0 +1,69 @@
+{
+  "name": "arcadia-launcher",
+  "productName": "ArcadiaSMP Launcher",
+  "version": "0.2.3",
+  "description": "ArcadiaSMP uchun oflayn Minecraft launcher — x-minecraft-launcher yadrosi asosida",
+  "main": "electron/main.js",
+  "author": "ArcadiaSMP",
+  "license": "MIT",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ArcadiaUZ/ArcadiaSMP-Launcher.git"
+  },
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "dist": "electron-builder --win nsis --x64"
+  },
+  "dependencies": {
+    "@xmcl/core": "2.13.0",
+    "@xmcl/installer": "5.4.0",
+    "@xmcl/task": "4.1.0",
+    "electron-updater": "^6.6.2"
+  },
+  "devDependencies": {
+    "electron": "33.4.11",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "uz.arcadiasmp.launcher",
+    "productName": "ArcadiaSMP Launcher",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "renderer/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "ArcadiaUZ",
+        "repo": "ArcadiaSMP-Launcher"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "renderer/assets/img/icon.png",
+      "artifactName": "ArcadiaSMP-Launcher-${version}-setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "ArcadiaSMP Launcher"
+    }
+  }
+}

@@ -1,0 +1,357 @@
+﻿<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ArcadiaSMP Launcher</title>
+<link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body>
+
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<!-- ============================ LOGIN ============================ -->
+<section id="loginView" class="login hidden">
+  <div class="login-bg" aria-hidden="true"></div>
+  <div class="login-win no-drag">
+    <button class="wbtn" data-win="minimize" title="Kichraytirish"><span data-icon="minus"></span></button>
+    <button class="wbtn" data-win="maximize" title="Kattalashtirish"><span data-icon="square"></span></button>
+    <button class="wbtn danger" data-win="close" title="Yopish"><span data-icon="x"></span></button>
+  </div>
+
+  <div class="login-inner">
+    <div class="login-brand">
+      <div class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48"><path d="M24 3 42 13.5v21L24 45 6 34.5v-21Z"/><path d="m24 13 10 6v10l-10 6-10-6V19Z"/><path d="m24 21 4 2.5v5L24 31l-4-2.5v-5Z"/></svg>
+      </div>
+      <div>
+        <p class="brand-kicker">EMERALD SMP</p>
+        <h1>Arcadia<span>SMP</span></h1>
+      </div>
+      <p class="login-tag">Vanilla hissiyotidagi emerald server.<br>Claim, saylov, 126 topshiriq va bitta katta dunyo.</p>
+      <div class="login-facts">
+        <div><span data-icon="mountain"></span><b>256 chunk</b><small>Voxy + shader</small></div>
+        <div><span data-icon="shield-check"></span><b>Oflayn</b><small>Microsoft shart emas</small></div>
+        <div><span data-icon="users"></span><b>20 slot</b><small>Paper 26.3</small></div>
+      </div>
+    </div>
+
+    <div class="login-card glass">
+      <div class="login-card-head">
+        <span class="pill"><span class="dot" id="loginDot"></span><span id="loginServerState">Server tekshirilmoqda…</span></span>
+        <h2>Hisobga kirish</h2>
+        <p>O'yindagi <code>/register</code> parolingiz bilan kiring. Launcher parolni saqlamaydi.</p>
+      </div>
+
+      <form id="loginForm" class="form" autocomplete="off">
+        <label class="field">
+          <span class="field-ico" data-icon="user"></span>
+          <input id="loginUser" type="text" maxlength="16" placeholder="Minecraft nik" autocomplete="username" spellcheck="false" required>
+        </label>
+        <label class="field">
+          <span class="field-ico" data-icon="lock"></span>
+          <input id="loginPass" type="password" placeholder="Parol" autocomplete="current-password" required>
+          <button type="button" class="field-btn" id="togglePass" title="Parolni ko'rsatish"><span data-icon="eye-off"></span></button>
+        </label>
+        <div id="loginError" class="form-error hidden"></div>
+        <button type="submit" class="btn primary full" id="loginBtn">
+          <span data-icon="key"></span><span>Kirish</span>
+        </button>
+      </form>
+
+      <div class="login-note">
+        <span data-icon="info"></span>
+        <p>Hisobingiz yo'qmi? Serverda <code>/register parol parol</code> yuboring, keyin shu yerda kiring.</p>
+      </div>
+      <button class="link-btn" id="loginSettingsBtn"><span data-icon="settings"></span> Server manzilini sozlash</button>
+      <div id="loginSettings" class="mini-settings hidden">
+        <label>Panel manzili <input id="loginBase" type="text" placeholder="http://127.0.0.1:8081"></label>
+        <button class="btn ghost small" id="loginBaseSave">Saqlash</button>
+      </div>
+    </div>
+  </div>
+  <footer class="login-foot">
+    <span>ArcadiaSMP Launcher <b id="loginVersion">0.2.3</b></span>
+    <span>x-minecraft-launcher yadrosi · oflayn rejim</span>
+  </footer>
+</section>
+
+<!-- ============================ APP ============================ -->
+<div id="appView" class="app hidden">
+  <aside class="rail no-drag">
+    <button class="rail-logo" data-page="home" data-tip="Bosh sahifa" title="ArcadiaSMP">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3 42 13.5v21L24 45 6 34.5v-21Z"/><path d="m24 13 10 6v10l-10 6-10-6V19Z"/><path d="m24 21 4 2.5v5L24 31l-4-2.5v-5Z"/></svg>
+    </button>
+    <button class="rail-avatar" id="railAccount" data-tip="Hisob" title="Hisob"></button>
+
+    <nav class="rail-nav" id="nav" aria-label="Asosiy navigatsiya">
+      <button class="rail-btn active" data-page="home" data-tip="Bosh sahifa" title="Bosh sahifa"><span data-icon="home"></span></button>
+      <button class="rail-btn" data-page="instances" data-tip="Kutubxona" title="Kutubxona"><span data-icon="boxes"></span></button>
+      <button class="rail-btn" data-page="content" data-tip="Kontent" title="Kontent"><span data-icon="puzzle"></span></button>
+      <button class="rail-btn" data-page="servers" data-tip="Serverlar" title="Serverlar"><span data-icon="globe"></span></button>
+      <button class="rail-btn" data-page="skins" data-tip="Ko'rinish" title="Ko'rinish"><span data-icon="shirt"></span></button>
+    </nav>
+
+    <div class="rail-line"></div>
+    <button class="rail-btn rail-add" id="railAdd" data-tip="Yangi instans" title="Yangi instans"><span data-icon="plus"></span></button>
+    <div class="rail-instances" id="railInstances"></div>
+
+    <div class="rail-bottom">
+      <button class="rail-btn" data-page="settings" data-tip="Sozlamalar" title="Sozlamalar"><span data-icon="settings"></span></button>
+      <button class="rail-btn" id="railLogout" data-tip="Chiqish" title="Chiqish"><span data-icon="logout"></span></button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar drag">
+      <div class="topbar-left no-drag">
+        <button class="top-back hidden" id="backBtn" title="Orqaga"><span data-icon="arrow-left"></span></button>
+        <div class="crumb">
+          <b id="pageTitle">Bosh sahifa</b>
+          <span id="pageSub">ArcadiaSMP Launcher</span>
+        </div>
+      </div>
+      <div class="topbar-right no-drag">
+        <button class="game-chip hidden" id="gameChip" title="O'yinni to'xtatish">
+          <span class="dot"></span><span id="gameChipText">O'yin ishlamoqda</span><span class="gchip-stop">To'xtatish</span>
+        </button>
+        <div class="win-btns">
+          <button class="wbtn" data-win="minimize" title="Kichraytirish"><span data-icon="minus"></span></button>
+          <button class="wbtn" data-win="maximize" title="Kattalashtirish"><span data-icon="square"></span></button>
+          <button class="wbtn danger" data-win="close" title="Yopish"><span data-icon="x"></span></button>
+        </div>
+      </div>
+    </header>
+
+    <div class="content" id="content">
+      <!-- HOME -->
+      <section class="page page-home active" id="page-home">
+        <div class="home-hero">
+          <img class="hero-art" src="assets/img/hero.jpg" alt="">
+          <div class="hero-shade"></div>
+          <div class="hero-inner">
+            <span class="eyebrow"><i class="dot"></i> PAPER 26.3 · EMERALD SMP</span>
+            <h1>Vanilla hissiyoti.<br><span>Arcadia</span> qoidalari.</h1>
+            <p>Bitta katta dunyo, 126 topshiriq, claim va adolatli saylov. Microsoft hisobi shart emas.</p>
+            <div class="hero-actions">
+              <button class="btn primary lg" id="homePlay"><span data-icon="play"></span><span>O'ynash</span></button>
+              <button class="btn glass lg" id="homeSite"><span data-icon="globe"></span><span>Sayt</span></button>
+            </div>
+            <div class="hero-meta">
+              <button class="ip-box" id="homeIp" title="IP'ni nusxalash">
+                <span>SERVER IP</span><b id="homeIpText">127.0.0.1:25565</b><i data-icon="copy"></i>
+              </button>
+              <div class="hero-facts">
+                <span><i data-icon="check"></i> 126 topshiriq</span>
+                <span><i data-icon="check"></i> Claim + saylov</span>
+                <span><i data-icon="check"></i> Oflayn rejim</span>
+              </div>
+            </div>
+          </div>
+          <button class="hero-instance" id="homeInstPick" title="Instansni almashtirish">
+            <span class="hi-icon" id="homeInstIcon"></span>
+            <span class="hi-text"><small>TANLANGAN INSTANS</small><b id="homeInstName">ArcadiaSMP</b><em id="homeInstMeta">Vanilla · 26.3</em></span>
+            <span class="hi-swap" data-icon="chevron-right"></span>
+          </button>
+        </div>
+
+        <div class="home-cards">
+          <article class="hcard">
+            <div class="hcard-head"><span class="hcard-ico" data-icon="server"></span><div><b>Server</b><small>ArcadiaSMP · 26.3</small></div></div>
+            <p>20 slotli Paper server. Pay-to-win yo'q, AFK-farm taqiqlangan, oddiy farmalar ruxsat.</p>
+            <div class="hcard-actions">
+              <button class="btn subtle sm" id="homeJoin"><span data-icon="play"></span> Qo'shilish</button>
+              <button class="link-sm" id="homeRules">Qoidalar <span data-icon="arrow-right"></span></button>
+            </div>
+          </article>
+
+          <article class="hcard hcard-news">
+            <div class="hcard-head"><span class="hcard-ico" data-icon="bell"></span><div><b>Yangiliklar</b><small>Launcher va server</small></div></div>
+            <div class="news-mini">
+              <button data-news="modrinth">
+                <span class="nm-ico" data-icon="puzzle"></span>
+                <span><b>Modrinth integratsiyasi</b><small>Bir bosishda mod o'rnatish</small></span>
+                <span class="nm-time">Yangi</span>
+              </button>
+              <button data-news="advancements">
+                <span class="nm-ico" data-icon="target"></span>
+                <span><b>126 topshiriq</b><small>26.3 to'liq ro'yxati</small></span>
+                <span class="nm-time">Yangilandi</span>
+              </button>
+              <button data-news="elections">
+                <span class="nm-ico" data-icon="landmark"></span>
+                <span><b>Saylov va claim</b><small>Adolatli boshqaruv</small></span>
+                <span class="nm-time">Server</span>
+              </button>
+            </div>
+          </article>
+
+          <article class="hcard">
+            <div class="hcard-head"><span class="hcard-ico" data-icon="gem"></span><div><b>Launcher</b><small id="homeVersion">v0.2.3</small></div></div>
+            <p>Minecraft 26.3 fayllarini o'zi yuklaydi. Oflayn rejim, skin va server integratsiyasi.</p>
+            <div class="hcard-actions">
+              <button class="btn subtle sm" id="homeLibrary"><span data-icon="boxes"></span> Kutubxona</button>
+              <button class="link-sm" id="homeSettings">Sozlamalar <span data-icon="arrow-right"></span></button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- LIBRARY -->
+      <section class="page" id="page-instances">
+        <div class="page-head">
+          <div>
+            <h1>Kutubxona</h1>
+            <p>Har bir instans alohida modlar, dunyolar va sozlamalarga ega.</p>
+          </div>
+          <button class="btn primary" id="newInstanceBtn"><span data-icon="plus"></span> Yangi instans</button>
+        </div>
+        <div class="instance-grid" id="instanceGrid"></div>
+      </section>
+
+      <!-- INSTANCE DETAIL / CONTENT -->
+      <section class="page page-detail" id="page-detail">
+        <div id="detailRoot"></div>
+      </section>
+
+      <!-- SERVERS -->
+      <section class="page" id="page-servers">
+        <div class="page-head">
+          <div>
+            <h1>Serverlar</h1>
+            <p>ArcadiaSMP — oflayn rejimdagi bitta katta dunyo.</p>
+          </div>
+          <button class="btn subtle" id="refreshStatusBtn"><span data-icon="refresh"></span> Yangilash</button>
+        </div>
+        <div class="server-hero">
+          <div class="server-info">
+            <span class="pill"><span class="dot" id="serversPillDot"></span><span id="serversPillText">Tekshirilmoqda…</span></span>
+            <h2>ArcadiaSMP</h2>
+            <p>Claim, saylov, 126 topshiriq va 256 chunk render. Microsoft hisobi talab qilinmaydi.</p>
+            <div class="server-ip" id="serversIp">127.0.0.1:25565</div>
+            <div class="server-actions">
+              <button class="btn primary" id="joinBtn"><span data-icon="play"></span> Qo'shilish</button>
+              <button class="btn glass" id="copyIp2"><span data-icon="copy"></span> IP nusxalash</button>
+              <button class="btn glass" id="openSite"><span data-icon="globe"></span> Sayt</button>
+            </div>
+            <div class="server-stats">
+              <div><small>ONLAYN</small><b id="serversOnline">0</b></div>
+              <div><small>SLOT</small><b id="serversMax">20</b></div>
+              <div><small>VERSIYA</small><b id="serversVersion">26.3</b></div>
+              <div><small>REJIM</small><b>Oflayn</b></div>
+            </div>
+          </div>
+          <div class="server-players">
+            <div class="sp-head"><b>Hozir o'ynayotganlar</b><span id="playersCount">0</span></div>
+            <div class="players-grid" id="playersGrid"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SKINS -->
+      <section class="page" id="page-skins">
+        <div class="page-head">
+          <div>
+            <h1>Ko'rinish</h1>
+            <p>Skin serverga darhol qo'llanadi va barcha o'yinchilarga ko'rinadi.</p>
+          </div>
+          <span class="pill"><span class="dot"></span><span id="skinAccount">—</span></span>
+        </div>
+        <div class="skin-grid">
+          <div class="card skin-stage-card">
+            <div class="skin-stage" id="skinStage"></div>
+            <div class="skin-hint"><span data-icon="rotate"></span> Sudrab aylantiring · g'ildirak bilan yaqinlashtiring</div>
+          </div>
+          <div class="card skin-side">
+            <div class="skin-owner"><span class="avatar lg" id="skinAvatar"></span><div><b id="skinName">—</b><small id="skinUuid">—</small></div></div>
+            <h3>Skin boshqaruvi</h3>
+            <p class="small muted">64×64 PNG. Yuklangandan so'ng o'yinda qayta kirish shart emas.</p>
+            <div class="skin-actions">
+              <button class="btn primary" id="uploadSkinBtn"><span data-icon="upload"></span> Skin yuklash</button>
+              <button class="btn ghost" id="resetSkinBtn"><span data-icon="refresh"></span> Standart skin</button>
+            </div>
+            <ul class="skin-checks">
+              <li><span data-icon="check-circle"></span> Server barcha o'yinchilarga tarqatadi</li>
+              <li><span data-icon="check-circle"></span> Microsoft/Mojang'ga yuborilmaydi</li>
+              <li><span data-icon="check-circle"></span> 3D T-Pose tekshiruvi</li>
+            </ul>
+            <div class="skin-tip">
+              <b><span data-icon="lightbulb"></span> Qanday yuklayman?</b>
+              <ol>
+                <li>Skin 64×64 PNG bo'lishi kerak.</li>
+                <li>“Skin yuklash” tugmasini bosing.</li>
+                <li>O'yinda skin avtomatik yangilanadi.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="page" id="page-settings">
+        <div class="page-head">
+          <div><h1>Sozlamalar</h1><p>Launcher, Java va server ulanishi.</p></div>
+        </div>
+        <div class="settings-grid">
+          <div class="card">
+            <h3><span data-icon="gamepad"></span> O'yin</h3>
+            <label class="set-row">Xotira (RAM)
+              <div class="range-row"><input type="range" id="memRange" min="2048" max="12288" step="512"><b id="memValue">4 GB</b></div>
+            </label>
+            <label class="set-row">Java
+              <div class="input-row"><input type="text" id="javaPath" placeholder="Avtomatik aniqlanadi"><button class="btn ghost sm" id="pickJava"><span data-icon="folder"></span></button></div>
+              <div class="inline-status"><span class="dot" id="javaPillDot"></span><span id="javaVersion">Java tekshirilmoqda…</span><button class="link-sm" id="detectJava">Tekshirish</button></div>
+            </label>
+            <label class="set-row">O'yin papkasi
+              <div class="input-row"><input type="text" id="gameDir"><button class="btn ghost sm" id="pickGameDir"><span data-icon="folder"></span></button><button class="btn ghost sm" id="openGameDir"><span data-icon="external"></span></button></div>
+            </label>
+          </div>
+
+          <div class="card">
+            <h3><span data-icon="server"></span> Server</h3>
+            <label class="set-row">Panel manzili
+              <input type="text" id="baseUrl" placeholder="http://127.0.0.1:8081">
+            </label>
+            <div class="two-col">
+              <label class="set-row">Host <input type="text" id="serverHost"></label>
+              <label class="set-row">Port <input type="number" id="serverPort" min="1" max="65535"></label>
+            </div>
+            <label class="switch-row"><span>O'yin ochilganda serverga qo'shilish</span><input type="checkbox" id="autoJoin"><i class="switch"></i></label>
+            <div class="settings-note"><span data-icon="info"></span> Server oflayn. Kirish uchun o'yin ichida <code>/login parol</code> yozasiz.</div>
+          </div>
+
+          <div class="card">
+            <h3><span data-icon="info"></span> Launcher haqida</h3>
+            <div class="about-row"><span>Versiya</span><b id="aboutVersion">0.2.3</b></div>
+            <div class="about-row"><span>Yadro</span><b>x-minecraft-launcher</b></div>
+            <div class="about-row"><span>Minecraft</span><b>26.3</b></div>
+            <div class="about-row"><span>Rejim</span><b>Oflayn (ArcadiaCore)</b></div>
+            <div class="about-row"><span>Yangilanish</span><b id="updateStatus">Tekshirilmagan</b></div>
+            <div class="update-progress hidden" id="updateProgress"><i id="updateBar"></i></div>
+            <div class="update-actions">
+              <button class="btn ghost" id="checkUpdateBtn"><span data-icon="refresh"></span> Tekshirish</button>
+              <button class="btn primary hidden" id="installUpdateBtn"><span data-icon="download"></span> Yangilash</button>
+            </div>
+            <div class="about-row"><span>Manba kodi</span><b><button class="link-sm" id="openSourceBtn">GitHub</button></b></div>
+            <div class="settings-note"><span data-icon="info"></span> Yangilanishlar rasmiy GitHub release'dan olinadi. Manba kodi ochiq, shuning uchun launcher ichida yashirin kod yo'qligini tekshirish mumkin.</div>
+            <div class="card-actions">
+              <button class="btn primary" id="saveSettingsBtn"><span data-icon="save"></span> Saqlash</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div id="modalRoot" class="modal hidden">
+  <div class="modal-back" id="modalBack"></div>
+  <div class="modal-box" id="modalBox"></div>
+</div>
+<div id="toastRoot" class="toasts"></div>
+
+<script src="assets/js/icons.js"></script>
+<script src="assets/js/skinview.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
