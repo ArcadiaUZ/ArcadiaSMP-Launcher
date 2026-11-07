@@ -101,6 +101,7 @@ renderer/
 - Auto-update oqimi GitHub release orqali to‘liq tekshirildi.
 - `0.2.3` dan `0.2.4` ga avtomatik yangilanish ishlaydi.
 - `updater.js` da holat loglari qo‘shildi (diagnostika uchun).
+- O‘yin ishlayotganda yangilash bloklanadi — avval o‘yinni yopish kerak.
 
 ### 0.2.3
 
