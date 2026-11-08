@@ -1521,7 +1521,7 @@
             (p.icon ? '<img src="' + esc(p.icon) + '" alt="">' : Icons.html('puzzle')) +
             '</span><div class="browse-info"><b>' + esc(p.title) + '</b><p>' + esc(p.description) + '</p>' +
             '<small>' + esc(downloads(p.downloads)) + ' yuklab olinish · ' + esc(p.author || 'Modrinth') + '</small></div>' +
-            '<button class="btn subtle sm" data-install="' + esc(p.id) + '" data-title="' + esc(p.title) + '" data-icon="' + esc(p.icon || '') + '"' +
+            '<button class="btn subtle sm" data-install="' + esc(p.id) + '" data-title="' + esc(p.title) + '"' +
             (blocked ? ' disabled title="Modlar uchun mod loaderli instans kerak"' : '') + '>' +
             Icons.html(blocked ? 'info' : 'download') + ' ' + (blocked ? 'Loader kerak' : 'O\u2018rnatish') + '</button></div>'
         )

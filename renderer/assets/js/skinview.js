@@ -45,8 +45,8 @@ window.SkinViewer = (function () {
     switch (key) {
       case 'front': return 'translateZ(' + hd + 'px)';
       case 'back': return 'rotateY(180deg) translateZ(' + hd + 'px)';
-      case 'right': return 'rotateY(90deg) translateZ(' + hw + 'px)';
-      case 'left': return 'rotateY(-90deg) translateZ(' + hw + 'px)';
+      case 'right': return 'rotateY(-90deg) translateZ(' + hw + 'px)';
+      case 'left': return 'rotateY(90deg) translateZ(' + hw + 'px)';
       case 'top': return 'rotateX(90deg) translateZ(' + hh + 'px)';
       default: return 'rotateX(-90deg) translateZ(' + hh + 'px)';
     }

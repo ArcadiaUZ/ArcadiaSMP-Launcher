@@ -111,6 +111,12 @@ renderer/
 
 ## Versiyalar
 
+### 0.2.5
+
+- Modrinth o‘rnatish tugmasidagi ikonka tuzatildi: endi `!` o‘rniga yuklash
+  strelkasi ko‘rinadi.
+- 3D skin yon tomonlari o‘yindagi yo‘nalishga moslandi (web va launcher).
+
 ### 0.2.4
 
 - Auto-update oqimi GitHub release orqali to‘liq tekshirildi.
