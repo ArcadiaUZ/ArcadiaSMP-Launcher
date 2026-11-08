@@ -3,3 +3,8 @@ dist/
 shots/
 cache/
 *.log
+
+arcadia-eyes/build/
+arcadia-eyes/.gradle/
+arcadia-eyes/run/
+arcadia-eyes/ArcadiaEyes-*.zip

@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 /**
  * ArcadiaSMP default client pack.
@@ -11,6 +11,9 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
+const http = require('http');
+const https = require('https');
 const mc = require('./minecraft');
 const modrinth = require('./modrinth');
 const PACK = require('./default-pack.json');
@@ -63,6 +66,90 @@ function fileReady(file, size) {
   }
 }
 
+/** Download a pinned first-party asset (Arcadia Eyes mod/pack) with integrity checks. */
+function downloadToFile(url, target, expectedSha256, expectedSize) {
+  const tmp = target + '.part';
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  return new Promise((resolve, reject) => {
+    const lib = String(url).startsWith('http:') ? http : https;
+    const req = lib.get(url, { headers: { 'User-Agent': 'ArcadiaSMP-Launcher' } }, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        res.resume();
+        const next = new URL(res.headers.location, url).toString();
+        downloadToFile(next, target, expectedSha256, expectedSize).then(resolve, reject);
+        return;
+      }
+      if (res.statusCode !== 200) {
+        res.resume();
+        reject(new Error('HTTP ' + res.statusCode + ' — ' + url));
+        return;
+      }
+      const out = fs.createWriteStream(tmp);
+      res.pipe(out);
+      out.on('finish', () => out.close(() => {
+        try {
+          const st = fs.statSync(tmp);
+          if (expectedSize && st.size !== expectedSize) {
+            throw new Error('hajm mos emas (' + st.size + ' != ' + expectedSize + ')');
+          }
+          if (expectedSha256) {
+            const hash = crypto.createHash('sha256').update(fs.readFileSync(tmp)).digest('hex');
+            if (hash.toLowerCase() !== String(expectedSha256).toLowerCase()) {
+              throw new Error('SHA-256 mos emas');
+            }
+          }
+          fs.rmSync(target, { force: true });
+          fs.renameSync(tmp, target);
+          resolve();
+        } catch (e) {
+          fs.rmSync(tmp, { force: true });
+          reject(e);
+        }
+      }));
+      out.on('error', (e) => {
+        fs.rmSync(tmp, { force: true });
+        reject(e);
+      });
+    });
+    req.on('error', (e) => {
+      fs.rmSync(tmp, { force: true });
+      reject(e);
+    });
+    req.setTimeout(120000, () => req.destroy(new Error('yuklash vaqti tugadi')));
+  });
+}
+
+/**
+ * Existing instances keep their settings. Only the pack entry is migrated:
+ * the old Just Expressions entry is replaced with Arcadia Eyes (or appended).
+ */
+function migrateOptions(file) {
+  try {
+    let text = fs.readFileSync(file, 'utf8');
+    const oldName = 'file/JustExpressions_v1.2.1.zip';
+    const newName = 'file/ArcadiaEyes-v1.0.0.zip';
+    if (text.includes(oldName)) {
+      text = text.replace(oldName, newName);
+    } else if (!text.includes(newName)) {
+      const match = text.match(/^resourcePacks:(.*)$/m);
+      if (match) {
+        try {
+          const packs = JSON.parse(match[1]);
+          if (Array.isArray(packs)) {
+            packs.push(newName);
+            text = text.replace(match[0], 'resourcePacks:' + JSON.stringify(packs));
+          }
+        } catch (_) {
+          /* leave malformed options alone; the game will rebuild them */
+        }
+      }
+    }
+    fs.writeFileSync(file, text, 'utf8');
+  } catch (_) {
+    /* options are optional */
+  }
+}
+
 function findInstance() {
   return mc.listInstances().find((i) => i.id === 'arcadia') || null;
 }
@@ -76,10 +163,15 @@ function writeDefaults(instanceId) {
   const root = dataDir(instanceId);
   const config = path.join(root, 'config');
   fs.mkdirSync(config, { recursive: true });
-  try {
-    fs.copyFileSync(TEMPLATE_OPTIONS, path.join(root, 'options.txt'));
-  } catch (_) {
-    /* options are optional */
+  const optionsPath = path.join(root, 'options.txt');
+  if (!fs.existsSync(optionsPath)) {
+    try {
+      fs.copyFileSync(TEMPLATE_OPTIONS, optionsPath);
+    } catch (_) {
+      /* options are optional */
+    }
+  } else {
+    migrateOptions(optionsPath);
   }
   try {
     fs.writeFileSync(path.join(config, 'iris.properties'), IRIS_CONFIG, 'utf8');
@@ -188,24 +280,35 @@ async function run(onProgress) {
         continue;
       }
       try {
-        await modrinth.install({
-          instanceId: current.id,
-          projectId: item.projectId,
-          versionId: item.versionId,
-          type: item.kind,
-          title: item.title,
-          icon: item.icon,
-          onProgress: (p) => {
-            emit(onProgress, {
-              stage: 'pack',
-              percent: 42 + Math.round((done / Math.max(1, items.length)) * 53),
-              index: idx,
-              total: items.length,
-              title: item.title,
-              text: item.title + ' · ' + (p && p.percent ? p.percent + '%' : 'yuklanmoqda…'),
-            });
-          },
-        });
+        if (item.url) {
+          await downloadToFile(item.url, target, item.sha256, item.size);
+          mc.recordContentMeta(current.id, item.kind, item.filename, {
+            title: item.title,
+            icon: item.icon,
+            version: item.version,
+            filename: item.filename,
+            kind: item.kind,
+          });
+        } else {
+          await modrinth.install({
+            instanceId: current.id,
+            projectId: item.projectId,
+            versionId: item.versionId,
+            type: item.kind,
+            title: item.title,
+            icon: item.icon,
+            onProgress: (p) => {
+              emit(onProgress, {
+                stage: 'pack',
+                percent: 42 + Math.round((done / Math.max(1, items.length)) * 53),
+                index: idx,
+                total: items.length,
+                title: item.title,
+                text: item.title + ' · ' + (p && p.percent ? p.percent + '%' : 'yuklanmoqda…'),
+              });
+            },
+          });
+        }
         done++;
       } catch (e) {
         failed.push({ title: item.title, error: e.message || String(e) });

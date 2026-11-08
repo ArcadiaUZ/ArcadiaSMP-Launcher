@@ -1,0 +1,19 @@
+{
+  "pack": {
+    "pack_format": 15,
+    "supported_formats": { "min_inclusive": 15, "max_inclusive": 999 },
+    "description": "§7Arcadia Eyes §8· §fjonli ko'zlar\n§8Just Expressions asosida: §7FreshLX §8va §7Ithan\n§8Arcadia Eyes mod bilan ishlaydi",
+    "min_format": 15,
+    "max_format": 999
+  },
+  "overlays": {
+    "entries": [
+      {
+        "directory": "21-2",
+        "formats": { "min_inclusive": 42, "max_inclusive": 999 },
+        "min_format": 42,
+        "max_format": 999
+      }
+    ]
+  }
+}

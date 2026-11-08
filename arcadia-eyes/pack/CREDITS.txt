@@ -1,0 +1,20 @@
+Arcadia Eyes v1.0.0
+====================
+
+ArcadiaSMP uchun jonli ko'z harakati (client-side).
+
+Asl pack: Just Expressions 1.2.1
+  FreshLX          - Fresh Animations / animatsiyalar
+  Ithan            - Just Expressions
+  Traben           - EMF/ETF va player model qo'llab-quvvatlash
+  BoZo-Xo2         - Fresh Player asosi
+  CoolRanchChris   - Fresh Player asosi
+  Laynce           - face/eye texnologiyasi
+
+Litsenziya: CC BY-NC-SA 4.0
+  https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+Bu o'zgartirilgan versiya faqat bepul (nokommerchesk) tarqatiladi va
+xuddi shu CC BY-NC-SA 4.0 litsenziyasi ostida bo'ladi.
+
+Arcadia Eyes mod (arcadia-eyes) - ArcadiaSMP, MIT.

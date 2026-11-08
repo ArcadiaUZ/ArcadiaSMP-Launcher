@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "minecraft": "26.3",
   "loader": "fabric",
   "items": [
@@ -467,14 +467,23 @@
       "icon": "https://cdn.modrinth.com/data/TAIMVZCL/b3918b1dcedad8987cac3715ec95d00aaadc3a49_96.webp"
     },
     {
+      "kind": "mod",
+      "slug": "arcadia-eyes",
+      "title": "Arcadia Eyes",
+      "filename": "arcadia-eyes-1.0.0.jar",
+      "size": 11688,
+      "sha256": "5ce968c636bd3c1af7d0b9e5091d07d36354997b70498838a37303b7d2855367",
+      "url": "https://github.com/ArcadiaUZ/ArcadiaSMP-Launcher/releases/download/eyes-v1.0.0/arcadia-eyes-1.0.0.jar",
+      "icon": "https://cdn.modrinth.com/data/vPaHlT2U/db614979822e991f66f1213b578e08652e282ba0_96.webp"
+    },
+    {
       "kind": "resourcepack",
-      "slug": "just-expressions",
-      "title": "Just Expressions",
-      "projectId": "vPaHlT2U",
-      "versionId": "ZNXAMRW4",
-      "version": "1.2.1",
-      "filename": "JustExpressions_v1.2.1.zip",
-      "size": 262755,
+      "slug": "arcadia-eyes-pack",
+      "title": "Arcadia Eyes (pack)",
+      "filename": "ArcadiaEyes-v1.0.0.zip",
+      "size": 261315,
+      "sha256": "f7e6535ea20658d62e9910821028319c56a093691e933efb4452e4d275c6a743",
+      "url": "https://github.com/ArcadiaUZ/ArcadiaSMP-Launcher/releases/download/eyes-v1.0.0/ArcadiaEyes-v1.0.0.zip",
       "icon": "https://cdn.modrinth.com/data/vPaHlT2U/db614979822e991f66f1213b578e08652e282ba0_96.webp"
     },
     {

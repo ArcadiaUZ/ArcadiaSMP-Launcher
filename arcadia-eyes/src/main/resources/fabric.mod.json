@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "arcadia_eyes",
+  "version": "${version}",
+  "name": "Arcadia Eyes",
+  "description": "Brings natural eye contact to ArcadiaSMP players.",
+  "authors": ["ArcadiaSMP"],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["uz.arcadia.eyes.ArcadiaEyesClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.20.1",
+    "minecraft": "~26.3",
+    "java": ">=25"
+  },
+  "suggests": {
+    "entity_model_features": "*"
+  }
+}
