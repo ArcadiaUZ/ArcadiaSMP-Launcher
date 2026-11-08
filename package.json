@@ -1,7 +1,7 @@
 {
   "name": "arcadia-launcher",
   "productName": "ArcadiaSMP Launcher",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "ArcadiaSMP uchun oflayn Minecraft launcher — x-minecraft-launcher yadrosi asosida",
   "main": "electron/main.js",
   "author": "ArcadiaSMP",
@@ -14,7 +14,9 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
-    "dist": "electron-builder --win nsis --x64"
+    "dist": "electron-builder --win nsis --x64",
+    "dist:local": "electron-builder --win nsis --x64 --config.electronDist=node_modules/electron/dist",
+    "test:updater": "node scripts/test-updater-engine.js"
   },
   "dependencies": {
     "@xmcl/core": "2.13.0",
@@ -55,7 +57,7 @@
           ]
         }
       ],
-      "icon": "renderer/assets/img/icon.png",
+      "icon": "renderer/assets/img/icon.ico",
       "artifactName": "ArcadiaSMP-Launcher-${version}-setup.${ext}"
     },
     "nsis": {
