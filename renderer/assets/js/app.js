@@ -15,6 +15,8 @@
     account: null,
     avatar: null,
     skin: null,
+    cape: null,
+    skinModel: 'classic',
     instances: [],
     instance: null,
     icons: {},
@@ -275,6 +277,11 @@
     if ($('skinAccount')) $('skinAccount').textContent = acct.username || '—';
     if ($('skinName')) $('skinName').textContent = acct.username || '—';
     if ($('skinUuid')) $('skinUuid').textContent = acct.uuid || '';
+    if ($('skinModelSeg')) {
+      qsa('#skinModelSeg button').forEach((b) => {
+        b.classList.toggle('active', b.dataset.model === (acct.skinModel || S.skinModel || 'classic'));
+      });
+    }
   }
 
   function accountModal() {
@@ -300,6 +307,8 @@
       S.account = null;
       S.avatar = null;
       S.skin = null;
+      S.cape = null;
+      S.skinModel = 'classic';
       S.viewer = null;
       S.instances = [];
       S.instance = null;
@@ -467,6 +476,8 @@
     await reloadInstances();
     if (!S.avatar && S.account) S.avatar = await getAvatar(S.account.uuid, S.account.skinVersion);
     if (!S.skin) S.skin = await A.skin.get().catch(() => null);
+    if (S.account) S.skinModel = S.account.skinModel || 'classic';
+    if (S.account && S.cape === null) S.cape = await A.skin.getCape().catch(() => null);
 
     renderAccount();
     renderRailInstances();
@@ -1566,34 +1577,81 @@
   function mountSkinViewer() {
     if (!window.SkinViewer || !$('skinStage')) return;
     const url = S.skin || 'assets/img/steve-skin.png';
-    S.viewer = window.SkinViewer.mount($('skinStage'), { skin: url, unit: 7.2, autoRotate: true });
+    S.viewer = window.SkinViewer.mount($('skinStage'), {
+      skin: url,
+      cape: S.cape || '',
+      model: S.skinModel || 'classic',
+      unit: 7.2,
+      autoRotate: true,
+    });
   }
 
   async function uploadSkin() {
     try {
       const file = await A.dialog.skin();
       if (!file) return;
-      const result = await A.skin.upload(file);
-      S.account = result.account;
-      S.avatar = result.avatar;
-      S.skin = result.skin;
-      renderAccount();
-      if (S.viewer) S.viewer.setSkin(S.skin);
-      else mountSkinViewer();
-      toast('Skin yangilandi va serverga yuborildi', 'ok');
+      const fill = $('fillOverlay') ? $('fillOverlay').checked : true;
+      const result = await A.skin.upload(file, S.skinModel || 'classic', fill);
+      applySkinResult(result);
+      toast(
+        'Skin yangilandi' +
+          (result.account && result.account.skinModel === 'slim' ? ' · Slim' : '') +
+          (fill ? ' · overlay to‘ldirildi' : ''),
+        'ok'
+      );
     } catch (e) { toast(errText(e), 'err'); }
   }
 
   async function resetSkin() {
     try {
       const result = await A.skin.reset();
-      S.account = result.account;
-      S.avatar = result.avatar;
-      S.skin = result.skin;
-      renderAccount();
-      if (S.viewer) S.viewer.setSkin(S.skin);
-      else mountSkinViewer();
+      applySkinResult(result);
       toast('Standart skin qaytarildi', 'ok');
+    } catch (e) { toast(errText(e), 'err'); }
+  }
+
+  function applySkinResult(result) {
+    if (!result) return;
+    if (result.account) S.account = result.account;
+    if (result.skin !== undefined) S.skin = result.skin;
+    if (result.cape !== undefined) S.cape = result.cape;
+    if (result.account && result.account.skinModel) S.skinModel = result.account.skinModel;
+    renderAccount();
+    if (S.viewer) {
+      S.viewer.setSkin(S.skin, S.skinModel);
+      S.viewer.setCape(S.cape);
+    } else {
+      mountSkinViewer();
+    }
+    if (S.avatar) setAvatar($('skinAvatar'), S.avatar);
+  }
+
+  async function setSkinModel(model) {
+    try {
+      const result = await A.skin.setModel(model);
+      S.skinModel = result.model || model;
+      if (result.account) S.account = result.account;
+      renderAccount();
+      if (S.viewer) S.viewer.setModel(S.skinModel);
+      toast('Model: ' + (S.skinModel === 'slim' ? 'Slim' : 'Klassik'), 'ok');
+    } catch (e) { toast(errText(e), 'err'); }
+  }
+
+  async function uploadCape() {
+    try {
+      const file = await A.dialog.cape();
+      if (!file) return;
+      const result = await A.skin.uploadCape(file);
+      applySkinResult(result);
+      toast('Cape yangilandi', 'ok');
+    } catch (e) { toast(errText(e), 'err'); }
+  }
+
+  async function resetCape() {
+    try {
+      const result = await A.skin.resetCape();
+      applySkinResult(result);
+      toast('Cape o‘chirildi', 'ok');
     } catch (e) { toast(errText(e), 'err'); }
   }
 
@@ -1605,7 +1663,10 @@
     const status = (st && st.status) || 'idle';
     if (status === 'dev') return 'Manba rejimi (avto-yangilanish o\u2018chirilgan)';
     if (status === 'checking') return 'Tekshirilmoqda\u2026';
-    if (status === 'downloading') return 'Yuklanmoqda ' + Math.round(Number(st.progress) || 0) + '%';
+    if (status === 'downloading') {
+      const pct = Math.round(Number(st.progress) || 0);
+      return 'Yuklanmoqda ' + pct + '%' + (st.mode === 'differential' ? ' · tez' : '');
+    }
     if (status === 'ready') return 'v' + (st.available || '?') + ' tayyor';
     if (status === 'current') return 'Eng so\u2018nggi versiya';
     if (status === 'installing') return 'O\u2018rnatilmoqda\u2026';
@@ -1618,7 +1679,7 @@
     const status = st.status || 'idle';
     if ($('updateStatus')) {
       $('updateStatus').textContent = updateText(st);
-      $('updateStatus').title = st.error || '';
+      $('updateStatus').title = st.detail || st.error || '';
     }
     const bar = $('updateBar');
     const progress = $('updateProgress');
@@ -1792,6 +1853,8 @@
       S.account = null;
       S.avatar = null;
       S.skin = null;
+      S.cape = null;
+      S.skinModel = 'classic';
       A.auth.logout().catch(() => {});
       showLogin();
     });
@@ -1876,6 +1939,11 @@
 
     $('uploadSkinBtn').addEventListener('click', uploadSkin);
     $('resetSkinBtn').addEventListener('click', resetSkin);
+    $('uploadCapeBtn').addEventListener('click', uploadCape);
+    $('resetCapeBtn').addEventListener('click', resetCape);
+    qsa('#skinModelSeg button').forEach((b) => {
+      b.addEventListener('click', () => setSkinModel(b.dataset.model));
+    });
 
     $('memRange').addEventListener('input', () => {
       const v = Number($('memRange').value);

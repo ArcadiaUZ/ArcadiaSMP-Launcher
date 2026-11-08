@@ -510,6 +510,12 @@ input:focus, select:focus, textarea:focus { border-color: rgba(61, 220, 132, .5)
 .skin-face { position: absolute; left: 0; top: 0; image-rendering: pixelated; background-repeat: no-repeat; backface-visibility: hidden; }
 .skin-shadow { position: absolute; bottom: 54px; width: 180px; height: 34px; border-radius: 50%; background: radial-gradient(ellipse, rgba(0, 0, 0, .55), transparent 65%); filter: blur(7px); }
 .skin-hint { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 12px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--line); }
+.skin-model-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 22px; margin: 4px 0 10px; font-size: 12px; color: var(--muted); }
+.seg { display: inline-flex; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: rgba(0, 0, 0, .18); }
+.seg button { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 11px; padding: 6px 12px; border-radius: 7px; cursor: pointer; }
+.seg button.active { background: rgba(61, 220, 132, .18); color: var(--em); }
+.skin-check { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--muted); padding: 0 22px 14px; }
+.skin-check input { accent-color: var(--em); }
 .skin-hint .icon { width: 14px; height: 14px; }
 .skin-side h3 { margin: 16px 0 6px; font-size: 16px; }
 .skin-owner { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid var(--line); border-radius: 12px; background: rgba(0, 0, 0, .18); }

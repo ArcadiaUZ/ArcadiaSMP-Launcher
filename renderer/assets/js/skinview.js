@@ -1,5 +1,6 @@
 /* ArcadiaSMP — 3D skin viewer (pure CSS 3D, no three.js).
- * Minecraft 64×64 skin atlas → CSS cubes. T-Pose, drag bilan aylantirish,
+ * Minecraft 64×64 skin atlas → CSS cubes. Base + overlay (hat/jacket/
+ * sleeves/pants), classic/slim model va cape. T-Pose, drag bilan aylantirish,
  * g'ildirak bilan zoom, bo'sh turganda sekin avto-aylanish.
  */
 window.SkinViewer = (function () {
@@ -15,18 +16,14 @@ window.SkinViewer = (function () {
     leftLeg:  { top: [20, 48, 4, 4], bottom: [24, 48, 4, 4], right: [16, 52, 4, 12], front: [20, 52, 4, 12], left: [24, 52, 4, 12], back: [28, 52, 4, 12] },
   };
 
-  /* model units: 1 texture pixel = 1 unit */
-  const SIZE = {
-    head: [8, 8, 8], body: [8, 12, 4],
-    rightArm: [4, 12, 4], leftArm: [4, 12, 4],
-    rightLeg: [4, 12, 4], leftLeg: [4, 12, 4],
-  };
-
-  /* origin — model markazi (y pastga musbat) */
-  const OFFSET = {
-    head: [0, -12], body: [0, -2],
-    rightArm: [-6, -2], leftArm: [6, -2],
-    rightLeg: [-2, 10], leftLeg: [2, 10],
+  /* Overlay qatlamlari — 64×64 atlas, 1.8+ layout */
+  const OVERLAY = {
+    head:     { top: [40, 0, 8, 8], bottom: [48, 0, 8, 8], right: [32, 8, 8, 8], front: [40, 8, 8, 8], left: [48, 8, 8, 8], back: [56, 8, 8, 8] },
+    body:     { top: [20, 32, 8, 4], bottom: [28, 32, 8, 4], right: [16, 36, 4, 12], front: [20, 36, 8, 12], left: [28, 36, 4, 12], back: [32, 36, 8, 12] },
+    rightArm: { top: [44, 32, 4, 4], bottom: [48, 32, 4, 4], right: [40, 36, 4, 12], front: [44, 36, 4, 12], left: [48, 36, 4, 12], back: [52, 36, 4, 12] },
+    leftArm:  { top: [52, 48, 4, 4], bottom: [56, 48, 4, 4], right: [48, 52, 4, 12], front: [52, 52, 4, 12], left: [56, 52, 4, 12], back: [60, 52, 4, 12] },
+    rightLeg: { top: [4, 32, 4, 4], bottom: [8, 32, 4, 4], right: [0, 36, 4, 12], front: [4, 36, 4, 12], left: [8, 36, 4, 12], back: [12, 36, 4, 12] },
+    leftLeg:  { top: [4, 48, 4, 4], bottom: [8, 48, 4, 4], right: [0, 52, 4, 12], front: [4, 52, 4, 12], left: [8, 52, 4, 12], back: [12, 52, 4, 12] },
   };
 
   const FALLBACK = {
@@ -34,50 +31,109 @@ window.SkinViewer = (function () {
     leftArm: '#c98f70', rightLeg: '#3b4f9c', leftLeg: '#3b4f9c',
   };
 
+  const PARTS = ['head', 'body', 'rightArm', 'leftArm', 'rightLeg', 'leftLeg'];
+
+  function sizes(model) {
+    const arm = model === 'slim' ? 3 : 4;
+    return {
+      head: [8, 8, 8], body: [8, 12, 4],
+      rightArm: [arm, 12, 4], leftArm: [arm, 12, 4],
+      rightLeg: [4, 12, 4], leftLeg: [4, 12, 4],
+    };
+  }
+
+  function offsets(model) {
+    const arm = model === 'slim' ? 5.5 : 6;
+    return {
+      head: [0, -12], body: [0, -2],
+      rightArm: [-arm, -2], leftArm: [arm, -2],
+      rightLeg: [-2, 10], leftLeg: [2, 10],
+    };
+  }
+
   const FACE_DIM = (key, [w, h, d]) => {
     if (key === 'front' || key === 'back') return [w, h];
     if (key === 'left' || key === 'right') return [d, h];
     return [w, d];
   };
 
-  const FACE_TX = (key, u, [w, h, d]) => {
+  const FACE_TX = (key, u, [w, h, d], inflate) => {
     const hw = (w * u) / 2, hh = (h * u) / 2, hd = (d * u) / 2;
+    const off = (inflate || 0) * u;
     switch (key) {
-      case 'front': return 'translateZ(' + hd + 'px)';
-      case 'back': return 'rotateY(180deg) translateZ(' + hd + 'px)';
-      case 'right': return 'rotateY(-90deg) translateZ(' + hw + 'px)';
-      case 'left': return 'rotateY(90deg) translateZ(' + hw + 'px)';
-      case 'top': return 'rotateX(90deg) translateZ(' + hh + 'px)';
-      default: return 'rotateX(-90deg) translateZ(' + hh + 'px)';
+      case 'front': return 'translateZ(' + (hd + off) + 'px)';
+      case 'back': return 'rotateY(180deg) translateZ(' + (hd + off) + 'px)';
+      case 'right': return 'rotateY(-90deg) translateZ(' + (hw + off) + 'px)';
+      case 'left': return 'rotateY(90deg) translateZ(' + (hw + off) + 'px)';
+      case 'top': return 'rotateX(90deg) translateZ(' + (hh + off) + 'px)';
+      default: return 'rotateX(-90deg) translateZ(' + (hh + off) + 'px)';
     }
   };
 
-  function build(model, skinUrl, unit) {
-    const u = unit;
-    Object.entries(SIZE).forEach(([part, size]) => {
-      const el = document.createElement('div');
-      el.className = 'skin-part';
-      el.style.transform = 'translate3d(' + (OFFSET[part][0] * u) + 'px,' + (OFFSET[part][1] * u) + 'px,0)';
+  function addPart(model, part, size, off, atlas, skinUrl, unit, inflate, overlay) {
+    const el = document.createElement('div');
+    el.className = 'skin-part' + (overlay ? ' skin-part-overlay' : '');
+    el.style.transform = 'translate3d(' + (off[0] * unit) + 'px,' + (off[1] * unit) + 'px,0)';
 
-      Object.keys(ATLAS[part]).forEach((key) => {
-        const [tx, ty, tw, th] = ATLAS[part][key];
-        const [fw, fh] = FACE_DIM(key, size);
-        const face = document.createElement('div');
-        face.className = 'skin-face';
-        face.style.width = (fw * u) + 'px';
-        face.style.height = (fh * u) + 'px';
-        face.style.left = (-(fw * u) / 2) + 'px';
-        face.style.top = (-(fh * u) / 2) + 'px';
-        face.style.transform = FACE_TX(key, u, size);
-        face.style.backgroundImage = skinUrl;
-        face.style.backgroundSize = (64 * u) + 'px ' + (64 * u) + 'px';
-        face.style.backgroundPosition = (-tx * u) + 'px ' + (-ty * u) + 'px';
-        face.dataset.part = part;
-        el.appendChild(face);
-      });
-
-      model.appendChild(el);
+    Object.keys(atlas[part]).forEach((key) => {
+      const [tx, ty, tw, th] = atlas[part][key];
+      const [fw, fh] = FACE_DIM(key, size);
+      const face = document.createElement('div');
+      face.className = 'skin-face';
+      face.style.width = (fw * unit) + 'px';
+      face.style.height = (fh * unit) + 'px';
+      face.style.left = (-(fw * unit) / 2) + 'px';
+      face.style.top = (-(fh * unit) / 2) + 'px';
+      face.style.transform = FACE_TX(key, unit, size, inflate);
+      face.style.backgroundImage = skinUrl;
+      face.style.backgroundSize = (64 * unit) + 'px ' + (64 * unit) + 'px';
+      face.style.backgroundPosition = (-tx * unit) + 'px ' + (-ty * unit) + 'px';
+      face.dataset.part = part;
+      if (overlay) face.dataset.overlay = '1';
+      el.appendChild(face);
     });
+
+    model.appendChild(el);
+  }
+
+  function addCape(model, capeUrl, unit) {
+    if (!capeUrl) return;
+    const cape = document.createElement('div');
+    cape.className = 'skin-cape';
+    cape.style.position = 'absolute';
+    cape.style.left = (-5 * unit) + 'px';
+    cape.style.top = (-8 * unit) + 'px';
+    cape.style.width = (10 * unit) + 'px';
+    cape.style.height = (16 * unit) + 'px';
+    cape.style.backgroundImage = 'url("' + capeUrl + '")';
+    cape.style.backgroundRepeat = 'no-repeat';
+    cape.style.imageRendering = 'pixelated';
+    cape.style.backgroundSize = (64 * unit) + 'px ' + (32 * unit) + 'px';
+    cape.style.backgroundPosition = (-1 * unit) + 'px ' + (-1 * unit) + 'px';
+    cape.style.transform = 'translateZ(' + (-3 * unit) + 'px) rotateY(180deg)';
+    cape.style.backfaceVisibility = 'hidden';
+    const probe = new Image();
+    probe.onload = () => {
+      if (probe.naturalHeight > 32) {
+        cape.style.backgroundSize = (64 * unit) + 'px ' + (probe.naturalHeight * unit) + 'px';
+      }
+    };
+    probe.src = capeUrl;
+    model.insertBefore(cape, model.firstChild);
+  }
+
+  function build(modelEl, opts) {
+    const unit = opts.unit;
+    const size = sizes(opts.model);
+    const off = offsets(opts.model);
+    const skinUrl = 'url("' + (opts.skin || 'assets/img/steve-skin.png') + '")';
+
+    modelEl.innerHTML = '';
+    addCape(modelEl, opts.cape, unit);
+    PARTS.forEach((part) => addPart(modelEl, part, size[part], off[part], ATLAS, skinUrl, unit, 0, false));
+    if (opts.overlay !== false) {
+      PARTS.forEach((part) => addPart(modelEl, part, size[part], off[part], OVERLAY, skinUrl, unit, 0.5, true));
+    }
   }
 
   function flat(model) {
@@ -85,10 +141,15 @@ window.SkinViewer = (function () {
       f.style.backgroundImage = 'none';
       f.style.background = FALLBACK[f.dataset.part] || '#3a5a4c';
     });
+    const cape = model.querySelector('.skin-cape');
+    if (cape) cape.style.display = 'none';
   }
 
   function mount(stage, options) {
-    const opts = Object.assign({ skin: 'assets/img/steve-skin.png', unit: 7.2, autoRotate: true }, options || {});
+    const opts = Object.assign(
+      { skin: 'assets/img/steve-skin.png', cape: '', model: 'classic', unit: 7.2, autoRotate: true, overlay: true },
+      options || {}
+    );
     stage.innerHTML = '';
     stage.style.setProperty('--u', opts.unit + 'px');
 
@@ -98,11 +159,13 @@ window.SkinViewer = (function () {
     const model = document.createElement('div');
     model.className = 'skin-model';
 
-    build(model, 'url("' + opts.skin + '")', opts.unit);
+    build(model, opts);
     stage.appendChild(shadow);
     stage.appendChild(model);
 
-    let rx = -6, ry = 26, scale = 1;
+    let rx = opts.rx === undefined ? -6 : Number(opts.rx);
+    let ry = opts.ry === undefined ? 26 : Number(opts.ry);
+    let scale = 1;
     let dragging = false, lastX = 0, lastY = 0, lastAction = Date.now();
 
     const render = () => {
@@ -111,9 +174,9 @@ window.SkinViewer = (function () {
     render();
 
     /* skin yuklanmasa — rangli fallback */
-    const img = new Image();
-    img.onerror = () => flat(model);
-    img.src = opts.skin;
+    const probe = new Image();
+    probe.onerror = () => flat(model);
+    probe.src = opts.skin;
 
     const onDown = (e) => {
       dragging = true;
@@ -162,15 +225,31 @@ window.SkinViewer = (function () {
       requestAnimationFrame(tick);
     }
 
+    function rebuild() {
+      build(model, opts);
+      const img = new Image();
+      img.onerror = () => flat(model);
+      img.src = opts.skin;
+    }
+
     return {
-      reset() { rx = -6; ry = 26; scale = 1; render(); },
-      setSkin(url) {
-        model.querySelectorAll('.skin-face').forEach((f) => {
-          f.style.backgroundImage = 'url("' + url + '")';
-        });
-        const probe = new Image();
-        probe.onerror = () => flat(model);
-        probe.src = url;
+      reset() { rx = opts.rx === undefined ? -6 : Number(opts.rx); ry = opts.ry === undefined ? 26 : Number(opts.ry); scale = 1; render(); },
+      setSkin(url, modelType) {
+        opts.skin = url;
+        if (modelType) opts.model = modelType;
+        rebuild();
+      },
+      setModel(modelType) {
+        opts.model = modelType === 'slim' ? 'slim' : 'classic';
+        rebuild();
+      },
+      setCape(url) {
+        opts.cape = url || '';
+        rebuild();
+      },
+      setOverlay(enabled) {
+        opts.overlay = enabled !== false;
+        rebuild();
       },
     };
   }

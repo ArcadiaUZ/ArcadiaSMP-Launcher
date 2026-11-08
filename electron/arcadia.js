@@ -94,6 +94,9 @@ async function login(username, password) {
     cookies: fromResponse(res),
     hasSkin: !!data.hasSkin,
     skinVersion: data.skinVersion || 0,
+    skinModel: data.skinModel === 'slim' ? 'slim' : 'classic',
+    hasCape: !!data.hasCape,
+    capeVersion: data.capeVersion || 0,
     balance: Number(data.balance) || 0,
     claimBlocks: Number(data.claimBlocks) || 0,
     claims: Number(data.claims) || 0,
@@ -150,6 +153,9 @@ async function refreshAccount() {
       uuid: user.uuid,
       hasSkin: !!user.hasSkin,
       skinVersion: user.skinVersion || 0,
+      skinModel: user.skinModel === 'slim' ? 'slim' : 'classic',
+      hasCape: !!user.hasCape,
+      capeVersion: user.capeVersion || 0,
       balance: Number(user.balance) || 0,
       claimBlocks: Number(user.claimBlocks) || 0,
       claims: Number(user.claims) || 0,
@@ -218,13 +224,34 @@ async function fullSkin() {
   return mimeDataUrl(fs.readFileSync(DEFAULT_SKIN), 'image/png');
 }
 
-async function uploadSkin(filePath) {
+async function fullCape() {
+  const cfg = readConfig();
+  if (!cfg.account || !cfg.account.hasCape) return null;
+  try {
+    const res = await fetch(
+      joinUrl('/capes/' + encodeURIComponent(cfg.account.uuid) + '.png?v=' + (cfg.account.capeVersion || Date.now())),
+      {
+        headers: { Cookie: cfg.account.cookies || '' },
+        signal: AbortSignal.timeout(8000),
+      }
+    );
+    if (res.ok) return mimeDataUrl(Buffer.from(await res.arrayBuffer()), 'image/png');
+  } catch (_) {
+    /* no cape */
+  }
+  return null;
+}
+
+async function uploadSkin(filePath, model, fillOverlay) {
   const cfg = readConfig();
   if (!cfg.account) throw new Error('Avval hisobingizga kiring.');
   const buf = fs.readFileSync(filePath);
   if (!buf.length) throw new Error('Fayl bo\u2018sh.');
   if (buf.length > 512 * 1024) throw new Error('PNG fayl juda katta (maks. 512 KB).');
-  const { res, data } = await api('/api/skin', {
+  const query =
+    '?model=' + (model === 'slim' ? 'slim' : 'classic') +
+    '&fillOverlay=' + (fillOverlay === false ? '0' : '1');
+  const { res, data } = await api('/api/skin' + query, {
     method: 'POST',
     headers: { 'Content-Type': 'image/png' },
     body: buf,
@@ -233,6 +260,7 @@ async function uploadSkin(filePath) {
   const account = Object.assign({}, cfg.account, {
     hasSkin: true,
     skinVersion: Date.now(),
+    skinModel: data && data.model === 'slim' ? 'slim' : (model === 'slim' ? 'slim' : 'classic'),
   });
   saveAccount(account);
   return { ok: true, account };
@@ -246,6 +274,53 @@ async function resetSkin() {
   const account = Object.assign({}, cfg.account, {
     hasSkin: false,
     skinVersion: Date.now(),
+    skinModel: 'classic',
+  });
+  saveAccount(account);
+  return { ok: true, account };
+}
+
+async function setSkinModel(model) {
+  const cfg = readConfig();
+  if (!cfg.account) throw new Error('Avval hisobingizga kiring.');
+  const safe = model === 'slim' ? 'slim' : 'classic';
+  const { res, data } = await api('/api/skin?model=' + safe, { method: 'PUT' });
+  if (!res.ok) throw new Error(errorText(data, 'Model o\u2018zgartirilmadi.'));
+  const account = Object.assign({}, cfg.account, {
+    skinModel: data && data.model === 'slim' ? 'slim' : safe,
+  });
+  saveAccount(account);
+  return { ok: true, account };
+}
+
+async function uploadCape(filePath) {
+  const cfg = readConfig();
+  if (!cfg.account) throw new Error('Avval hisobingizga kiring.');
+  const buf = fs.readFileSync(filePath);
+  if (!buf.length) throw new Error('Fayl bo\u2018sh.');
+  if (buf.length > 512 * 1024) throw new Error('PNG fayl juda katta (maks. 512 KB).');
+  const { res, data } = await api('/api/cape', {
+    method: 'POST',
+    headers: { 'Content-Type': 'image/png' },
+    body: buf,
+  });
+  if (!res.ok) throw new Error(errorText(data, 'Cape qabul qilinmadi.'));
+  const account = Object.assign({}, cfg.account, {
+    hasCape: true,
+    capeVersion: Date.now(),
+  });
+  saveAccount(account);
+  return { ok: true, account };
+}
+
+async function resetCape() {
+  const cfg = readConfig();
+  if (!cfg.account) throw new Error('Avval hisobingizga kiring.');
+  const { res, data } = await api('/api/cape', { method: 'DELETE' });
+  if (!res.ok) throw new Error(errorText(data, 'Capeni o\u2018chirib bo\u2018lmadi.'));
+  const account = Object.assign({}, cfg.account, {
+    hasCape: false,
+    capeVersion: 0,
   });
   saveAccount(account);
   return { ok: true, account };
@@ -256,8 +331,12 @@ module.exports = {
   status,
   avatar,
   fullSkin,
+  fullCape,
   uploadSkin,
   resetSkin,
+  setSkinModel,
+  uploadCape,
+  resetCape,
   baseUrl,
   joinUrl,
   api,

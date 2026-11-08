@@ -226,6 +226,15 @@ ipcMain.handle('dialog:skin', async () => {
   return r.canceled ? null : r.filePaths[0];
 });
 
+ipcMain.handle('dialog:cape', async () => {
+  const r = await dialog.showOpenDialog(win, {
+    title: 'Cape tanlash (64×32 PNG)',
+    properties: ['openFile'],
+    filters: [{ name: 'Minecraft cape', extensions: ['png'] }],
+  });
+  return r.canceled || !r.filePaths[0] ? null : r.filePaths[0];
+});
+
 ipcMain.handle('dialog:image', async () => {
   const r = await dialog.showOpenDialog(win, {
     title: 'Instans rasmini tanlash',
@@ -291,29 +300,53 @@ ipcMain.handle('update:install', () => {
 
 ipcMain.handle('avatar:get', (_e, uuid, version) => arcadia.avatar(uuid, version));
 ipcMain.handle('skin:get', () => arcadia.fullSkin());
+ipcMain.handle('skin:get-cape', () => arcadia.fullCape());
 
-ipcMain.handle('skin:upload', async (_e, filePath) => {
+async function skinPayload(result) {
+  const account = cfgmod.publicConfig().account;
+  return {
+    account,
+    avatar: account ? await arcadia.avatar(account.uuid, account.skinVersion || Date.now()) : null,
+    skin: await arcadia.fullSkin(),
+    cape: await arcadia.fullCape(),
+  };
+}
+
+ipcMain.handle('skin:upload', async (_e, filePath, model, fillOverlay) => {
   const image = nativeImage.createFromPath(filePath);
   if (image.isEmpty()) throw new Error('PNG faylni o\u2018qib bo\u2018lmadi.');
   const size = image.getSize();
   if (size.width !== 64 || size.height !== 64) {
     throw new Error('Skin 64×64 PNG bo\u2018lishi kerak (hozir ' + size.width + '×' + size.height + ').');
   }
-  const result = await arcadia.uploadSkin(filePath);
-  return {
-    account: cfgmod.publicConfig().account,
-    avatar: await arcadia.avatar(result.account.uuid, result.account.skinVersion),
-    skin: await arcadia.fullSkin(),
-  };
+  const result = await arcadia.uploadSkin(filePath, model, fillOverlay);
+  return skinPayload(result);
 });
 
 ipcMain.handle('skin:reset', async () => {
   const result = await arcadia.resetSkin();
-  return {
-    account: cfgmod.publicConfig().account,
-    avatar: await arcadia.avatar(result.account.uuid, Date.now()),
-    skin: await arcadia.fullSkin(),
-  };
+  return skinPayload(result);
+});
+
+ipcMain.handle('skin:set-model', async (_e, model) => {
+  const result = await arcadia.setSkinModel(model);
+  return skinPayload(result);
+});
+
+ipcMain.handle('skin:upload-cape', async (_e, filePath) => {
+  const image = nativeImage.createFromPath(filePath);
+  if (image.isEmpty()) throw new Error('Cape PNG faylini o\u2018qib bo\u2018lmadi.');
+  const size = image.getSize();
+  if (size.width !== 64 || (size.height !== 32 && size.height !== 64)) {
+    throw new Error('Cape 64×32 PNG bo\u2018lishi kerak (hozir ' + size.width + '×' + size.height + ').');
+  }
+  const result = await arcadia.uploadCape(filePath);
+  return skinPayload(result);
+});
+
+ipcMain.handle('skin:reset-cape', async () => {
+  const result = await arcadia.resetCape();
+  return skinPayload(result);
 });
 
 ipcMain.handle('default:needs', () => defaultPack.needs());

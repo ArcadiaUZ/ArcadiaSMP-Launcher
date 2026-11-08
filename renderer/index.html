@@ -265,11 +265,23 @@
           <div class="card skin-side">
             <div class="skin-owner"><span class="avatar lg" id="skinAvatar"></span><div><b id="skinName">—</b><small id="skinUuid">—</small></div></div>
             <h3>Skin boshqaruvi</h3>
-            <p class="small muted">64×64 PNG. Yuklangandan so'ng o'yinda qayta kirish shart emas.</p>
+            <p class="small muted">64×64 PNG. Overlay qatlamlari saqlanadi; Klassik yoki Slim model va cape qo'llab-quvvatlanadi.</p>
             <div class="skin-actions">
               <button class="btn primary" id="uploadSkinBtn"><span data-icon="upload"></span> Skin yuklash</button>
               <button class="btn ghost" id="resetSkinBtn"><span data-icon="refresh"></span> Standart skin</button>
             </div>
+            <div class="skin-model-row">
+              <span>Model</span>
+              <div class="seg" id="skinModelSeg">
+                <button type="button" data-model="classic" class="active">Klassik</button>
+                <button type="button" data-model="slim">Slim</button>
+              </div>
+            </div>
+            <div class="skin-actions">
+              <button class="btn subtle" id="uploadCapeBtn"><span data-icon="upload"></span> Cape yuklash</button>
+              <button class="btn ghost" id="resetCapeBtn"><span data-icon="x"></span> Cape o'chirish</button>
+            </div>
+            <label class="skin-check"><input type="checkbox" id="fillOverlay" checked> Bo'sh overlay qatlamlarini asosiy qatlamdan to'ldirish</label>
             <ul class="skin-checks">
               <li><span data-icon="check-circle"></span> Server barcha o'yinchilarga tarqatadi</li>
               <li><span data-icon="check-circle"></span> Microsoft/Mojang'ga yuborilmaydi</li>
@@ -278,9 +290,9 @@
             <div class="skin-tip">
               <b><span data-icon="lightbulb"></span> Qanday yuklayman?</b>
               <ol>
-                <li>Skin 64×64 PNG bo'lishi kerak.</li>
-                <li>“Skin yuklash” tugmasini bosing.</li>
-                <li>O'yinda skin avtomatik yangilanadi.</li>
+                <li>Skin 64×64 PNG, cape 64×32 PNG bo'lishi kerak.</li>
+                <li>Modelni tanlang: Klassik yoki Slim.</li>
+                <li>O'yinda skin va cape avtomatik yangilanadi.</li>
               </ol>
             </div>
           </div>

@@ -1,10 +1,10 @@
-version: 0.2.6
-tag: v0.2.6-1
+version: 0.2.7
+tag: v0.2.7
 files:
-  - url: ArcadiaSMP-Launcher-0.2.6-setup.exe
-    sha512: I0844bEUy40VcnLA+QA0Q+me6xdCLMOcrvl9nrncZRswXYiQxjDnmCNdRWt1wm/YIbSnfZrNAbUye0bW6IWA1w==
-    size: 88824767
-path: ArcadiaSMP-Launcher-0.2.6-setup.exe
-sha512: I0844bEUy40VcnLA+QA0Q+me6xdCLMOcrvl9nrncZRswXYiQxjDnmCNdRWt1wm/YIbSnfZrNAbUye0bW6IWA1w==
-blockmap: update/old/0.2.6.blockmap
-releaseDate: '2026-11-08T07:53:15.494Z'
+  - url: ArcadiaSMP-Launcher-0.2.7-setup.exe
+    sha512: 9iewl8nEeWBfqvXKecGXOe20jPxZ9jVYIQcALNd3ViuxWVxiVvBfb0vCvnbEOMVhNys9nHAi7Js/LhY+VOYn4g==
+    size: 88946416
+path: ArcadiaSMP-Launcher-0.2.7-setup.exe
+sha512: 9iewl8nEeWBfqvXKecGXOe20jPxZ9jVYIQcALNd3ViuxWVxiVvBfb0vCvnbEOMVhNys9nHAi7Js/LhY+VOYn4g==
+blockmap: update/ArcadiaSMP-Launcher-0.2.7-setup.exe.blockmap
+releaseDate: '2026-11-08T12:00:14.223Z'

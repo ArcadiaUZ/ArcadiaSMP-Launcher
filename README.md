@@ -26,16 +26,28 @@ Fayl nomi: `ArcadiaSMP-Launcher-<versiya>-setup.exe`
 
 ### Auto-update
 
-`0.2.3` dan boshlab launcher:
+`0.2.7` dan boshlab launcher:
 
-1. Ishga tushganda va har 6 soatda GitHub release’larini tekshiradi.
-2. Yangi versiya bo‘lsa, installerni fonda yuklaydi.
-3. `Sozlamalar → Launcher haqida → Yangilash` tugmasi bilan qayta ishga tushib
+1. Yangilanish ma’lumotini `update/latest.yml` dan tez oladi (raw GitHub).
+2. Installerni tez GitHub mirror’laridan yuklaydi; yakuniy fayl SHA-512 bilan
+   tekshiriladi.
+3. Eski installer keshlangan bo‘lsa, faqat o‘zgargan bloklarni yuklaydi
+   (blockmap differential). Masalan, `0.2.6 → 0.2.7` farqi ~3.1 MB.
+4. `Sozlamalar → Launcher haqida → Yangilash` bilan qayta ishga tushib
    yangilanadi.
 
-> **Muhim:** hozir o‘rnatilgan `0.2.2` da auto-update kodi yo‘q. Shuning uchun
-> `0.2.3` yoki undan yangiroq versiyani **bir marta qo‘lda** o‘rnatish kerak.
-> Keyingi versiyalar avtomatik keladi.
+> **Muhim:** `0.2.6` dagi eski updater hali GitHub release’lariga bog‘liq.
+> Shu sababli `0.2.6` foydalanuvchilari `0.2.7` ni **bir marta qo‘lda**
+> o‘rnatishi tavsiya etiladi. Keyingi versiyalar tez va differensial keladi.
+
+### Skin, model va cape
+
+Launcher va veb-panelda:
+
+- 64×64 skinning overlay qatlamlari (shapka, kurtka, yeng, shim) ko‘rsatiladi;
+- Klassik va Slim model tanlanadi;
+- 64×32 cape yuklanadi va o‘yinda ko‘rinadi;
+- bo‘sh overlay qatlamlarini asosiy qatlamdan to‘ldirish mumkin.
 
 ## Talablar
 

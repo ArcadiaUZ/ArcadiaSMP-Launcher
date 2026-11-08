@@ -1,12 +1,16 @@
 'use strict';
 
 const { app } = require('electron');
-const { autoUpdater } = require('electron-updater');
+const path = require('path');
+const fs = require('fs');
+const { spawn } = require('child_process');
+const engine = require('./updater-engine');
 
 let getWindow = () => null;
 let initialized = false;
 let manualCheck = false;
 let timer = null;
+let active = null;
 
 let state = {
   status: 'idle',
@@ -15,6 +19,10 @@ let state = {
   progress: 0,
   transferred: 0,
   total: 0,
+  mode: '',
+  saved: 0,
+  mirror: '',
+  detail: '',
   error: '',
   checkedAt: 0,
   manual: false,
@@ -23,13 +31,13 @@ let state = {
 function emit() {
   const win = getWindow();
   if (win && !win.isDestroyed()) {
-    win.webContents.send('update:event', Object.assign({}, state));
+    win.webContents.send('update:event', Object.assign({}, state, { installerPath: undefined }));
   }
 }
 
 function set(patch) {
   state = Object.assign({}, state, patch || {});
-  console.log('[updater]', state.status, state.available || '', state.error || '');
+  console.log('[updater]', state.status, state.available || '', state.detail || '', state.error || '');
   emit();
 }
 
@@ -46,118 +54,165 @@ function init(options) {
     return;
   }
 
-  autoUpdater.autoDownload = true;
-  autoUpdater.autoInstallOnAppQuit = true;
-  autoUpdater.allowDowngrade = false;
-  autoUpdater.allowPrerelease = false;
-  autoUpdater.disableDifferentialDownload = true;
-  autoUpdater.disableWebInstaller = true;
-  autoUpdater.logger = console;
+  setTimeout(() => check(false), 5000);
+  timer = setInterval(() => check(false), 6 * 60 * 60 * 1000);
+  if (timer && typeof timer.unref === 'function') timer.unref();
+}
 
-  autoUpdater.on('checking-for-update', () => {
-    set({ status: 'checking', error: '', manual: manualCheck, checkedAt: Date.now() });
+function cacheDir() {
+  return path.join(app.getPath('userData'), 'updater');
+}
+
+function human(n) {
+  return engine.bytesText(n);
+}
+
+function progressDetail(p) {
+  if (!p) return state.detail;
+  if (p.stage === 'mirrors') return 'Tez server tanlanmoqda…';
+  if (p.stage === 'differential') return 'Tez yangilanish tayyorlanmoqda…';
+  if (p.stage === 'full') return 'To‘liq yangilanish yuklanmoqda…';
+  if (p.mode === 'differential' || state.mode === 'differential') {
+    const total = Number(p.total) || state.total || 0;
+    const saved = Number(p.saved) || state.saved || 0;
+    return 'Tez yangilanish · ' + human(total) + ' yuklanadi' + (saved ? ' · ' + human(saved) + ' tejaldi' : '');
+  }
+  return 'To‘liq yuklanmoqda';
+}
+
+function onProgress(p) {
+  if (!p) return;
+  const patch = {
+    status: 'downloading',
+    detail: progressDetail(p),
+    progress: Math.max(0, Math.min(100, Number(p.percent) || 0)),
+    transferred: Number(p.transferred) || 0,
+    total: Number(p.total) || 0,
+  };
+  if (p.mode) patch.mode = p.mode;
+  if (p.saved) patch.saved = Number(p.saved) || 0;
+  set(patch);
+}
+
+async function doCheck() {
+  const result = await engine.downloadUpdate({
+    currentVersion: app.getVersion(),
+    cacheDir: cacheDir(),
+    onProgress,
+    log: console,
   });
 
-  autoUpdater.on('update-available', (info) => {
-    set({
-      status: 'downloading',
-      available: (info && info.version) || '',
-      progress: 0,
-      transferred: 0,
-      total: 0,
-      error: '',
-      manual: manualCheck,
-      checkedAt: Date.now(),
-    });
-  });
-
-  autoUpdater.on('update-not-available', () => {
+  if (result.current) {
     set({
       status: 'current',
       available: '',
       progress: 0,
       transferred: 0,
       total: 0,
+      mode: '',
+      saved: 0,
+      mirror: '',
+      detail: result.meta && result.meta.version
+        ? 'Serverdagi versiya: ' + result.meta.version
+        : 'Eng so‘nggi versiya',
       error: '',
       manual: manualCheck,
       checkedAt: Date.now(),
     });
     manualCheck = false;
-  });
+    return;
+  }
 
-  autoUpdater.on('download-progress', (p) => {
-    set({
-      status: 'downloading',
-      progress: Math.max(0, Math.min(100, Number(p && p.percent) || 0)),
-      transferred: Number(p && p.transferred) || 0,
-      total: Number(p && p.total) || 0,
-    });
+  set({
+    status: 'ready',
+    available: result.version,
+    progress: 100,
+    transferred: result.download || 0,
+    total: result.download || 0,
+    mode: result.mode || 'full',
+    saved: result.saved || 0,
+    mirror: result.mirror || '',
+    detail: result.mode === 'differential'
+      ? 'Tez yangilanish tayyor · ' + human(result.saved || 0) + ' tejaldi'
+      : result.cached
+        ? 'Yuklangan yangilanish topildi'
+        : 'To‘liq yangilanish yuklandi',
+    installerPath: result.installerPath,
+    error: '',
+    manual: manualCheck,
+    checkedAt: Date.now(),
   });
-
-  autoUpdater.on('update-downloaded', (info) => {
-    set({
-      status: 'ready',
-      available: (info && info.version) || state.available,
-      progress: 100,
-      error: '',
-      manual: manualCheck,
-      checkedAt: Date.now(),
-    });
-    manualCheck = false;
-  });
-
-  autoUpdater.on('error', (err) => {
-    set({
-      status: 'error',
-      error: (err && err.message) || String(err || 'Yangilanish xatosi'),
-      manual: manualCheck,
-      checkedAt: Date.now(),
-    });
-    manualCheck = false;
-  });
-
-  setTimeout(() => check(false), 5000);
-  timer = setInterval(() => check(false), 6 * 60 * 60 * 1000);
-  if (timer && typeof timer.unref === 'function') timer.unref();
+  manualCheck = false;
 }
 
-async function check(isManual) {
+function check(isManual) {
   if (!app.isPackaged) {
     set({ status: 'dev' });
-    return getState();
+    return Promise.resolve(getState());
   }
-
+  if (active) return Promise.resolve(getState());
   manualCheck = !!isManual;
-  try {
-    set({ status: 'checking', error: '', manual: manualCheck, checkedAt: Date.now() });
-    await autoUpdater.checkForUpdates();
-  } catch (e) {
-    set({
-      status: 'error',
-      error: (e && e.message) || String(e),
-      manual: manualCheck,
-      checkedAt: Date.now(),
+  set({
+    status: 'checking',
+    available: '',
+    progress: 0,
+    transferred: 0,
+    total: 0,
+    mode: '',
+    saved: 0,
+    mirror: '',
+    detail: 'GitHub va tez serverlar tekshirilmoqda…',
+    error: '',
+    manual: manualCheck,
+    checkedAt: Date.now(),
+  });
+  active = doCheck()
+    .catch((e) => {
+      set({
+        status: 'error',
+        error: (e && e.message) || String(e || 'Yangilanish xatosi'),
+        detail: 'Qo‘lda yuklash: github.com/' + engine.REPO + '/releases/latest',
+        manual: manualCheck,
+        checkedAt: Date.now(),
+      });
+      manualCheck = false;
+    })
+    .finally(() => {
+      active = null;
     });
-    manualCheck = false;
-  }
-  return getState();
+  return Promise.resolve(getState());
 }
 
-function install() {
-  if (state.status !== 'ready') return false;
-  set({ status: 'installing' });
-  setTimeout(() => {
-    try {
-      autoUpdater.quitAndInstall(true, true);
-    } catch (e) {
-      set({ status: 'error', error: (e && e.message) || String(e) });
-    }
-  }, 250);
-  return true;
+async function install() {
+  if (state.status !== 'ready' || !state.installerPath) return false;
+  const installer = state.installerPath;
+  if (!fs.existsSync(installer)) {
+    set({ status: 'error', error: 'Yuklangan installer topilmadi', manual: true });
+    return false;
+  }
+  set({ status: 'installing', detail: 'O‘rnatilmoqda…' });
+  try {
+    const child = spawn(
+      installer,
+      ['--updated', '/S', '--force-run'],
+      { detached: true, stdio: 'ignore', windowsHide: true }
+    );
+    child.on('error', (e) => {
+      set({ status: 'error', error: (e && e.message) || String(e), manual: true });
+    });
+    child.unref();
+    setTimeout(() => app.quit(), 700);
+    return true;
+  } catch (e) {
+    set({ status: 'error', error: (e && e.message) || String(e), manual: true });
+    return false;
+  }
 }
 
 function getState() {
-  return Object.assign({}, state);
+  const copy = Object.assign({}, state);
+  delete copy.installerPath;
+  return copy;
 }
 
 module.exports = {

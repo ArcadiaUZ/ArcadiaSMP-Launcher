@@ -94,7 +94,10 @@ function publicConfig(cfg) {
           username: c.account.username,
           uuid: c.account.uuid,
           skinVersion: c.account.skinVersion || 0,
+          skinModel: c.account.skinModel === 'slim' ? 'slim' : 'classic',
           hasSkin: !!c.account.hasSkin,
+          hasCape: !!c.account.hasCape,
+          capeVersion: c.account.capeVersion || 0,
           sessionExpires: c.account.sessionExpires || 0,
         }
       : null,

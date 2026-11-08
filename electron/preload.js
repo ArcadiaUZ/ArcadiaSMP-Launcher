@@ -27,6 +27,7 @@ contextBridge.exposeInMainWorld('arcadia', {
   dialog: {
     dir: invoke('dialog:dir'),
     skin: invoke('dialog:skin'),
+    cape: invoke('dialog:cape'),
     image: invoke('dialog:image'),
   },
   folder: {
@@ -47,8 +48,12 @@ contextBridge.exposeInMainWorld('arcadia', {
   avatar: invoke('avatar:get'),
   skin: {
     get: invoke('skin:get'),
+    getCape: invoke('skin:get-cape'),
     upload: invoke('skin:upload'),
     reset: invoke('skin:reset'),
+    setModel: invoke('skin:set-model'),
+    uploadCape: invoke('skin:upload-cape'),
+    resetCape: invoke('skin:reset-cape'),
   },
   defaultPack: {
     needs: invoke('default:needs'),
