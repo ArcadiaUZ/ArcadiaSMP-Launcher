@@ -1,9 +1,9 @@
+# Reliz qo'lda chiqariladi: update/latest.yml dagi SHA-512 yuklangan installer
+# bilan aynan mos bo'lishi kerak. Workflow faqat qo'lda ishga tushiriladi.
 name: Build Windows installer
 
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_dispatch:
 
 permissions:
   contents: write
