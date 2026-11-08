@@ -1,0 +1,10 @@
+version: 0.2.6
+tag: v0.2.6-1
+files:
+  - url: ArcadiaSMP-Launcher-0.2.6-setup.exe
+    sha512: I0844bEUy40VcnLA+QA0Q+me6xdCLMOcrvl9nrncZRswXYiQxjDnmCNdRWt1wm/YIbSnfZrNAbUye0bW6IWA1w==
+    size: 88824767
+path: ArcadiaSMP-Launcher-0.2.6-setup.exe
+sha512: I0844bEUy40VcnLA+QA0Q+me6xdCLMOcrvl9nrncZRswXYiQxjDnmCNdRWt1wm/YIbSnfZrNAbUye0bW6IWA1w==
+blockmap: update/old/0.2.6.blockmap
+releaseDate: '2026-11-08T07:53:15.494Z'
